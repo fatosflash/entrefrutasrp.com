@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Entre Frutas</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+body { background:#fdfaf6; }
+.cart-slide { transition: transform .3s ease; }
+.star { cursor:pointer; font-size:22px; }
+.star.active { color:#facc15; }
+</style>
+</head>
+
+<body class="text-gray-800">
+
+<!-- HEADER -->
+<header class="bg-amber-900 text-white sticky top-0 z-50">
+  <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+    <h1 class="text-2xl font-bold">Entre Frutas</h1>
+    <button onclick="toggleCart()" class="relative text-xl">
+      🛒
+      <span id="cart-count"
+        class="absolute -top-2 -right-2 bg-red-600 text-white text-xs px-2 rounded-full">0</span>
+    </button>
+  </div>
+</header>
+
+<!-- BANNER -->
+<section class="bg-amber-100 py-10 text-center">
+  <h2 class="text-4xl font-bold text-amber-900">Geleias & Pães de Mel Artesanais</h2>
+  <p class="mt-2 text-amber-800">Sabor caseiro que transforma momentos 🍓</p>
+</section>
+
+<!-- PRODUTOS -->
+<main class="max-w-6xl mx-auto px-4 py-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+
+<script>
+const products = [
+ {id:1,name:"Geleia de Morango",price:25,img:"🍓"},
+ {id:2,name:"Geleia de Abacaxi com Pimenta",price:24,img:"🍍"},
+ {id:3,name:"Geleia de Frutas Vermelhas",price:28,img:"🍒"},
+ {id:4,name:"Geleia de Damasco",price:30,img:"🍑"},
+ {id:5,name:"Molho de Pimenta",price:18.99,img:"🌶️"},
+];
+
+let cart = [];
+let tempQty = {};
+
+products.forEach(p=>{
+document.write(`
+<div class="bg-white rounded-xl p-5 shadow text-center flex flex-col">
+  <div class="text-5xl mb-3">${p.img}</div>
+  <h3 class="font-bold mb-1">${p.name}</h3>
+  <p class="mb-3 font-semibold">R$ ${p.price.toFixed(2).replace('.',',')}</p>
+
+  <div class="flex justify-center items-center gap-3 mb-3">
+    <button onclick="changeTemp(${p.id},-1)" class="px-2 border rounded">−</button>
+    <span id="temp-${p.id}">1</span>
+    <button onclick="changeTemp(${p.id},1)" class="px-2 border rounded">+</button>
+  </div>
+
+  <button onclick="addToCart(${p.id})"
+    class="bg-amber-900 text-white py-2 rounded hover:bg-amber-800">
+    Adicionar
+  </button>
+</div>
+`);
+});
+</script>
+</main>
+
+<!-- COMENTÁRIOS -->
+<section class="bg-white py-12">
+  <h3 class="text-3xl font-bold text-center text-amber-900 mb-6">
+    Avaliações dos Clientes ⭐
+  </h3>
+
+  <div class="max-w-xl mx-auto px-4 space-y-4 mb-10">
+    <input id="comment-name" placeholder="Seu nome"
+      class="w-full border p-3 rounded">
+
+    <textarea id="comment-text" placeholder="Seu comentário"
+      class="w-full border p-3 rounded h-28"></textarea>
+
+    <div class="flex gap-1 justify-center">
+      <span class="star" onclick="setStars(1)">★</span>
+      <span class="star" onclick="setStars(2)">★</span>
+      <span class="star" onclick="setStars(3)">★</span>
+      <span class="star" onclick="setStars(4)">★</span>
+      <span class="star" onclick="setStars(5)">★</span>
+    </div>
+
+    <button onclick="addComment()"
+      class="w-full bg-amber-900 text-white py-3 rounded font-bold hover:bg-amber-800">
+      Enviar avaliação
+    </button>
+  </div>
+
+  <div id="comments"
+    class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 px-4">
+  </div>
+</section>
+
+<!-- CARRINHO -->
+<div id="cart"
+ class="fixed top-0 right-0 w-full max-w-sm h-full bg-white shadow-lg cart-slide translate-x-full z-50 flex flex-col">
+
+<div class="p-4 flex justify-between items-center border-b">
+  <h3 class="font-bold">Seu carrinho</h3>
+  <button onclick="toggleCart()">❌</button>
+</div>
+
+<div id="cart-items" class="flex-1 p-4 space-y-3 overflow-y-auto"></div>
+
+<div class="p-4 border-t space-y-3">
+  <p class="font-bold">Total: <span id="cart-total">R$ 0,00</span></p>
+
+  <input id="nome" placeholder="Seu nome"
+    class="w-full border p-2 rounded">
+
+  <input id="endereco" placeholder="Endereço completo"
+    class="w-full border p-2 rounded">
+
+  <button onclick="clearCart()" class="w-full bg-gray-300 py-2 rounded">
+    Limpar carrinho
+  </button>
+
+  <button onclick="checkout()"
+    class="w-full bg-green-600 text-white py-3 rounded font-bold">
+    Finalizar no WhatsApp
+  </button>
+</div>
+</div>
+
+<!-- RODAPÉ -->
+<footer class="bg-amber-900 text-white py-10 text-center">
+  <h4 class="text-2xl font-bold mb-2">Entre Frutas</h4>
+  <p class="text-amber-200 mb-4">Geleias e Pães de Mel Artesanais</p>
+
+  <a href="https://www.instagram.com/entrefrutasribeirao"
+     target="_blank"
+     class="inline-flex items-center gap-2 hover:text-amber-300">
+    📷 Instagram
+  </a>
+
+  <p class="mt-6 text-sm text-amber-300">
+    Transformando frutas em carinho, todos os dias 🍓
+  </p>
+</footer>
+
+<script>
+/* ===== CARRINHO ===== */
+function changeTemp(id,d){
+  tempQty[id]=(tempQty[id]||1)+d;
+  if(tempQty[id]<1) tempQty[id]=1;
+  document.getElementById(`temp-${id}`).innerText=tempQty[id];
+}
+
+function addToCart(id){
+  const q=tempQty[id]||1;
+  const p=products.find(x=>x.id===id);
+  const item=cart.find(i=>i.id===id);
+
+  if(item){
+    item.q+=q;
+  } else {
+    cart.push({id:p.id,name:p.name,price:p.price,q});
+  }
+
+  tempQty[id]=1;
+  document.getElementById(`temp-${id}`).innerText=1;
+  updateCart();
+}
+
+function updateCart(){
+  const el=document.getElementById("cart-items");
+  el.innerHTML="";
+  let total=0,count=0;
+
+  cart.forEach(i=>{
+    total+=i.price*i.q;
+    count+=i.q;
+    el.innerHTML+=`
+      <div class="flex justify-between">
+        <span>${i.q}x ${i.name}</span>
+        <span>R$ ${(i.price*i.q).toFixed(2).replace('.',',')}</span>
+      </div>`;
+  });
+
+  document.getElementById("cart-total").innerText=`R$ ${total.toFixed(2).replace('.',',')}`;
+  document.getElementById("cart-count").innerText=count;
+}
+
+function clearCart(){
+  cart=[];
+  updateCart();
+}
+
+function toggleCart(){
+  document.getElementById("cart").classList.toggle("translate-x-full");
+}
+
+function checkout(){
+  if(!cart.length) return alert("Carrinho vazio");
+
+  const nome=document.getElementById("nome").value;
+  const endereco=document.getElementById("endereco").value;
+  if(!nome||!endereco) return alert("Preencha nome e endereço");
+
+  const h=new Date().getHours();
+  let s=h<12?"Bom dia":h<18?"Boa tarde":"Boa noite";
+
+  let msg=`${s}! 😊%0A%0ASegue meu pedido:%0A%0A*Entre Frutas 🍓*%0A`;
+  let total=0;
+
+  cart.forEach(i=>{
+    msg+=`${i.q}x ${i.name}%0A`;
+    total+=i.price*i.q;
+  });
+
+  msg+=`%0A*Total: R$ ${total.toFixed(2).replace('.',',')}*%0A`;
+  msg+=`Nome: ${nome}%0AEndereço: ${endereco}`;
+
+  window.open(`https://wa.me/5516981035718?text=${msg}`,"_blank");
+}
+
+/* ===== COMENTÁRIOS ===== */
+let selectedStars=5;
+
+function setStars(n){
+  selectedStars=n;
+  document.querySelectorAll('.star').forEach((s,i)=>{
+    s.classList.toggle('active',i<n);
+  });
+}
+
+function addComment(){
+  const name=document.getElementById("comment-name").value;
+  const text=document.getElementById("comment-text").value;
+  if(!name||!text) return alert("Preencha tudo");
+
+  const comments=JSON.parse(localStorage.getItem("comments")||"[]");
+  comments.unshift({name,text,stars:selectedStars});
+  localStorage.setItem("comments",JSON.stringify(comments));
+
+  document.getElementById("comment-name").value="";
+  document.getElementById("comment-text").value="";
+  setStars(5);
+  loadComments();
+}
+
+function loadComments(){
+  const el=document.getElementById("comments");
+  el.innerHTML="";
+  const comments=JSON.parse(localStorage.getItem("comments")||"[]");
+
+  comments.forEach(c=>{
+    el.innerHTML+=`
+      <div class="p-5 border rounded-lg bg-amber-50">
+        <div class="text-yellow-400">${"★".repeat(c.stars)}</div>
+        <p class="mt-2 italic">"${c.text}"</p>
+        <p class="mt-2 font-bold text-amber-900">– ${c.name}</p>
+      </div>`;
+  });
+}
+
+window.onload=()=>{
+  setStars(5);
+  loadComments();
+};
+</script>
+
+</body>
+</html>
+
+
+
+
